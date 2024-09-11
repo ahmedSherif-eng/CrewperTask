@@ -1,0 +1,67 @@
+{
+  "components": [
+    {
+      "text": "<h1 align=\"center\">Order</h1>",
+      "label": "Text view",
+      "type": "text",
+      "layout": {
+        "row": "Row_09y5x33",
+        "columns": null
+      },
+      "id": "Field_05n2rj1",
+      "properties": {}
+    },
+    {
+      "label": "Order Name",
+      "type": "textfield",
+      "layout": {
+        "row": "Row_0omjesk",
+        "columns": null
+      },
+      "id": "Field_1dqs7kl",
+      "key": "name_field",
+      "readonly": false,
+      "validate": {
+        "required": false
+      },
+      "defaultValue": "${orderName}",
+      "properties": {}
+    },
+    {
+      "label": "Quantity",
+      "type": "textfield",
+      "layout": {
+        "row": "Row_1qjupjn",
+        "columns": null
+      },
+      "id": "Field_1g7bgwa",
+      "key": "quantity_field",
+      "readonly": true
+    },
+    {
+      "subtype": "datetime",
+      "dateLabel": "Date",
+      "label": "Date time",
+      "type": "datetime",
+      "layout": {
+        "row": "Row_1id1470",
+        "columns": null
+      },
+      "id": "Field_16p80u6",
+      "key": "datetime_eed9rg",
+      "readonly": true,
+      "timeLabel": "Time",
+      "timeSerializingFormat": "utc_offset",
+      "timeInterval": 15
+    }
+  ],
+  "type": "default",
+  "id": "New_Order_Form",
+  "exporter": {
+    "name": "Camunda Modeler",
+    "version": "5.26.0"
+  },
+  "executionPlatform": "Camunda Platform",
+  "executionPlatformVersion": "7.21.0",
+  "schemaVersion": 16
+}
