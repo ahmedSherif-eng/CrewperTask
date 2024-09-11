@@ -19,5 +19,8 @@ public class UpdateOrderService {
         }
         return false;
     }
+    public Orders getOrder(Long orderId) {
+        return orderRepo.findById(orderId).orElse(null);
+    }
 }
 

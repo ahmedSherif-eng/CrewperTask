@@ -2,9 +2,7 @@ package com.example.crewper.controllers;
 
 import com.example.crewper.entities.Orders;
 import com.example.crewper.model.OrderDTO;
-import com.example.crewper.model.OrderStatusDTO;
-import com.example.crewper.repositories.OrderRepo;
-import com.example.crewper.services.OrderService;
+
 import com.example.crewper.services.PaginationService;
 import com.example.crewper.services.UpdateOrderService;
 import lombok.RequiredArgsConstructor;
@@ -13,11 +11,6 @@ import org.camunda.bpm.engine.RepositoryService;
 import org.camunda.bpm.engine.RuntimeService;
 import org.camunda.bpm.engine.history.HistoricVariableInstance;
 import org.camunda.bpm.engine.runtime.ProcessInstance;
-import org.hibernate.query.Order;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -41,12 +34,23 @@ public class MainController {
         variables.put("order", orderDTO);
         runtimeService.startProcessInstanceByKey("Activity_Create_Order", orderDTO.getName());
     }
-
+    @GetMapping("/orders/{orderId}")
+    public ResponseEntity<?> getOrder(@PathVariable("orderId") Long orderId) {
+        Orders order = orderService.getOrder(orderId);
+        if (order != null) {
+            return ResponseEntity.ok(order);
+        } else {
+            return ResponseEntity.status(404).body("Order not found.");
+        }
+    }
 
     @PutMapping("/orders/{orderId}/status")
-    public ResponseEntity<String> updateOrderStatus(@PathVariable("orderId") Long orderId, @RequestBody OrderStatusDTO orderStatus) {
-        boolean updated = orderService.updateOrderStatus(orderId, orderStatus.getStatus());
-        System.out.println(orderStatus.getStatus());
+    public ResponseEntity<String> updateOrderStatus(@PathVariable("orderId") Long orderId,
+                                                    @RequestParam(name = "orderStatus") String orderStatus) {
+        if (!orderStatus.equals("ACCEPTED") && !orderStatus.equals("REJECTED")  && !orderStatus.equals("PENDING") && !orderStatus.equals("COMPLETED") ) {
+            return ResponseEntity.badRequest().body("Invalid status: Accepted, Rejected, Pending, Completed");
+        }
+        boolean updated = orderService.updateOrderStatus(orderId, orderStatus);
         if (updated) {
             return ResponseEntity.ok("Order status updated successfully.");
         } else {
@@ -54,12 +58,17 @@ public class MainController {
         }
     }
     @GetMapping("/orders")
-    public Page<Orders> getOrders(
+    public ResponseEntity<?> getOrders(
             @RequestParam(name = "page", defaultValue = "0") int page,
             @RequestParam(name = "size", defaultValue = "10") int size,
             @RequestParam(name = "sortBy", defaultValue = "id") String sortBy) {
-
-        return paginationService.getOrders(page, size, sortBy);
+            if (page < 0 || size < 1) {
+                return ResponseEntity.badRequest().body("Invalid page or size parameter.");
+            }
+            if (!sortBy.equals("id") && !sortBy.equals("name") && !sortBy.equals("date") && !sortBy.equals("status")) {
+                return ResponseEntity.badRequest().body("Invalid sortBy parameter. Use id, name, date, or status.");
+            }
+        return ResponseEntity.status(200).body(paginationService.getOrders(page, size, sortBy));
     }
     @GetMapping("/deploy")
     public void deployProcess() {
@@ -68,7 +77,7 @@ public class MainController {
 
     @Deprecated //do not use this endpoint in production
     //@GetMapping("/orders/{orderId}")
-    public Orders getOrders(@PathVariable("orderId") Long orderId) throws InterruptedException {
+    public Orders DeprecatedgetOrder(@PathVariable("orderId") Long orderId) throws InterruptedException {
         Map<String, Object> variables = new HashMap<>();
         variables.put("orderId", orderId);
         ProcessInstance processInstance = runtimeService.startProcessInstanceByKey("Activity_Get_Order", variables);
